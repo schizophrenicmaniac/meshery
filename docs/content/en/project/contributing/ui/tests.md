@@ -187,6 +187,8 @@ Gating on `conclusion` silently disarms the gate - the job goes green whatever t
 
 If a test is failing, fix it or mark it `test.fixme` with the tracking issue in the annotation. Never re-disarm the gate to turn a red build green.
 
+A red E2E job still reaches the QA dashboard. On a push to master, `publish-allure-report` in `.github/workflows/build-and-test.yml` runs whenever `tests-e2e` finished as `success` or `failure` and actually uploaded Allure results (the job exposes the artifact's id, which is empty when it failed before Playwright produced anything). Keep a status function such as `!cancelled()` in that job's `if:`: without one GitHub adds an implicit `success()`, and the failing runs - the ones whose report is worth reading - never get published. `ui/tests/publishAllureReport.test.ts` evaluates the condition against passing, failing, cancelled and artifact-less runs.
+
 ## How much of the suite runs at once
 
 **The CI run is serial: one Playwright worker.** `ui/playwright.config.js` sets `workers: process.env.CI ? 1 : 4`, and a local run keeps 4. Raising the CI number is how this job goes back to failing for reasons that have nothing to do with the change under test.

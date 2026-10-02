@@ -1,6 +1,11 @@
 name: "Upload Test Artifacts"
 description: "Upload test reports, allure results, traces, and HTML report"
 
+outputs:
+  allure-results-artifact-id:
+    description: "ID of the uploaded Allure results artifact; empty when there were no results to upload"
+    value: ${{ steps.upload-allure-results.outputs.artifact-id }}
+
 runs:
   using: "composite"
   steps:
@@ -23,6 +28,7 @@ runs:
         if-no-files-found: ignore
 
     - name: Upload Allure Results
+      id: upload-allure-results
       uses: actions/upload-artifact@v6
       with:
         name: allure-results

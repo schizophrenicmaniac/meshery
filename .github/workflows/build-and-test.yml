@@ -57,7 +57,16 @@ jobs:
     secrets:
       REMOTE_PROVIDER_TEST_USER_TOKEN: ${{ secrets.REMOTE_PROVIDER_TEST_USER_TOKEN }}
   publish-allure-report:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}    
+    # A failed suite is the run whose report is most worth reading. Without a
+    # status function GitHub adds an implicit success() here, which skipped
+    # this job every time tests-e2e failed. !cancelled() matches the other QA
+    # syncs (go-testing-ci.yml, mesheryctl-e2e.yaml); the artifact id is empty
+    # when the job failed before Playwright produced anything to publish.
+    if: >-
+      ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      && needs.build-meshery.result == 'success'
+      && (needs.tests-e2e.result == 'success' || needs.tests-e2e.result == 'failure')
+      && needs.tests-e2e.outputs.allure-results-artifact-id != '' }}
     needs: [build-meshery, tests-e2e]
     uses: ./.github/workflows/publish-allure-report.yml
     with:

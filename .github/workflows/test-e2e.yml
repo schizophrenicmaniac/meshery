@@ -13,6 +13,10 @@ on:
         value: ${{ jobs.test-e2e.outputs.test-report-artifact }}
       allure-results-artifact:
         value: ${{ jobs.test-e2e.outputs.allure-results-artifact }}
+      # Empty when the job ended before uploading any Allure results, so a
+      # caller can tell a failed suite from a job that never ran one.
+      allure-results-artifact-id:
+        value: ${{ jobs.test-e2e.outputs.allure-results-artifact-id }}
       playwright-traces-artifact:
         value: ${{ jobs.test-e2e.outputs.playwright-traces-artifact }}
       playwright-report-artifact:
@@ -53,6 +57,7 @@ jobs:
     outputs:
       test-report-artifact: e2e-test-report
       allure-results-artifact: allure-results
+      allure-results-artifact-id: ${{ steps.upload-test-artifacts.outputs.allure-results-artifact-id }}
       playwright-traces-artifact: playwright-traces
       playwright-report-artifact: playwright-report
     
@@ -178,6 +183,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Test Artifacts
+        id: upload-test-artifacts
         uses: ./.github/actions/upload-test-artifacts
         with:
           include-pr-metadata: ${{ github.event_name == 'pull_request' }}
