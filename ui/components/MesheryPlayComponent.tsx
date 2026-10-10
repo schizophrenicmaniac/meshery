@@ -116,41 +116,15 @@ const MesheryPlayComponent = () => {
   const handleAdapterChange = () => {
     return (event) => {
       if (event.target.value !== '') {
-        const selectedAdapter = meshAdapters.filter(
+        const selectedAdapter = meshAdapters.find(
           ({ adapterLocation }) => adapterLocation === event.target.value,
         );
-        if (selectedAdapter && selectedAdapter.size === 1) {
-          setAdapterState(selectedAdapter[0]);
-          dispatch(setAdapter({ selectedAdapter: selectedAdapter[0].name }));
+        if (selectedAdapter) {
+          setAdapterState(selectedAdapter);
+          dispatch(setAdapter({ selectedAdapter: selectedAdapter.name }));
         }
       }
     };
-  };
-
-  const renderIndividualAdapter = () => {
-    let adapCount = 0;
-    let adapter;
-    meshAdapters.forEach((adap) => {
-      if (adap.adapterLocation === adapter) {
-        adapter = adap;
-        meshAdapters.forEach((ad) => {
-          if (ad.name == adap.name) adapCount += 1;
-        });
-      }
-    });
-    if (adapter) {
-      const imageIcon = pickImage(adapter);
-      return (
-        <>
-          <MesheryAdapterPlayComponent
-            adapter={adapter}
-            adapCount={adapCount}
-            adapter_icon={imageIcon}
-          />
-        </>
-      );
-    }
-    return '';
   };
 
   if (!canViewAdapter) {
@@ -179,13 +153,6 @@ const MesheryPlayComponent = () => {
         </>
       </NoSsr>
     );
-  }
-
-  if (adapter && adapter !== '') {
-    const indContent = renderIndividualAdapter();
-    if (indContent !== '') {
-      return indContent;
-    }
   }
 
   const imageIcon = pickImage(adapter);
