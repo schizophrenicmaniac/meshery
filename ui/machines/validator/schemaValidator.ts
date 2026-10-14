@@ -53,12 +53,32 @@ const validateSchema = (schema, data, id) => {
   };
 };
 
+const definitionUnavailableError = (component) => ({
+  instancePath: '',
+  keyword: 'definitionUnavailable',
+  params: {
+    kind: component?.component?.kind,
+    model: component?.modelReference?.name,
+    version: component?.component?.version,
+  },
+  message: `Component definition unavailable for kind "${component?.component?.kind}" in model "${component?.modelReference?.name}" (version "${component?.component?.version}"), so this component could not be validated`,
+});
+
 const validateComponent = (component, validateAnnotations = false, componentDef) => {
-  if (!componentDef || (componentDef?.metadata?.isAnnotation && !validateAnnotations)) {
+  const isAnnotation = componentDef?.metadata?.isAnnotation || component?.metadata?.isAnnotation;
+  if (isAnnotation && !validateAnnotations) {
     // skip validation for annotations
     return {
       errors: [],
       componentDefinition: componentDef,
+      component,
+    };
+  }
+  // a definition that failed to load must not be reported as a component without errors
+  if (!componentDef) {
+    return {
+      errors: [definitionUnavailableError(component)],
+      componentDefinition: undefined,
       component,
     };
   }
