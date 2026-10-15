@@ -138,6 +138,7 @@
           }
 
           &.active {
+            color: var(--brand-color);
             font-weight: 600;
           }
         }
